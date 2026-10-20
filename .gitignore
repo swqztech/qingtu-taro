@@ -1,4 +1,5 @@
 dist/
+project.private.config.json
 node_modules/
 .swc/
 *.local
