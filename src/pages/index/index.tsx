@@ -23,6 +23,9 @@ export default function Index() {
   const [log, setLog] = useState('');
 
   const pickFiles = async () => {
+    if (busy) {
+      return;
+    }
     try {
       const res = await Taro.chooseImage({
         count: 9,
@@ -31,7 +34,7 @@ export default function Index() {
       });
       const added: PickedImage[] = res.tempFilePaths.map((path, i) => ({
         path,
-        name: `image-${files.length + i + 1}.jpg`,
+        name: `图片 ${files.length + i + 1}`,
       }));
       setFiles(prev => [...prev, ...added]);
     } catch {
@@ -46,7 +49,7 @@ export default function Index() {
     } catch {
       Taro.showModal({
         title: '轻图',
-        content: '保存失败，请检查相册权限，或长按预览图保存。',
+        content: '保存失败，请检查相册权限。',
         showCancel: false,
       });
     }
@@ -91,89 +94,114 @@ export default function Index() {
     }
   };
 
+  const clearAll = () => {
+    setFiles([]);
+    setLog('');
+  };
+
   const runLabel = compressTab
     ? `开始压缩 (${files.length})`
     : `开始拼接 (${files.length})`;
 
   return (
     <View className='page'>
-      <Text className='title'>轻图</Text>
-      <Text className='tagline'>把体积压下去，细节留住</Text>
-      <Text className='hint'>本地处理 · PNG / JPG</Text>
-
-      <View className='tabs'>
-        <View
-          className={`tab ${compressTab ? 'tab-active' : ''}`}
-          onClick={() => setCompressTab(true)}>
-          压缩
+      <ScrollView scrollY className='scroll-main' enhanced showScrollbar={false}>
+        <View className='hero'>
+          <Text className='brand'>轻图</Text>
+          <Text className='tagline'>把体积压下去，细节留住</Text>
+          <Text className='hint'>本地处理 · 不上传 · PNG / JPG</Text>
         </View>
-        <View
-          className={`tab ${!compressTab ? 'tab-active' : ''}`}
-          onClick={() => setCompressTab(false)}>
-          拼接
-        </View>
-      </View>
 
-      <View className='card'>
-        <Text style={{ color: files.length ? '#0d9488' : '#64748b' }}>
-          {files.length ? `已选 ${files.length} 张` : '点击下方选择图片'}
-        </Text>
-        <View className='btn-orange' onClick={busy ? undefined : pickFiles}>
-          选择图片
-        </View>
-      </View>
-
-      <ScrollView scrollY className='file-list'>
-        {files.map(f => (
-          <View key={f.path}>{f.name}</View>
-        ))}
-      </ScrollView>
-
-      {compressTab ? (
-        <View className='panel'>
-          <Text>质量：{quality}</Text>
-          <View className='quality-row'>
-            <Text onClick={() => setQuality(q => Math.max(1, q - 5))}>-</Text>
-            <Text>{quality}</Text>
-            <Text onClick={() => setQuality(q => Math.min(100, q + 5))}>+</Text>
+        <View className='seg'>
+          <View
+            className={`seg-item ${compressTab ? 'seg-item-active' : ''}`}
+            onClick={() => setCompressTab(true)}>
+            压缩
           </View>
-          <Text>输出格式</Text>
-          <View className='chips'>
-            {(
-              [
-                ['保持原格式', 'keep'],
-                ['JPEG', 'jpeg'],
-                ['PNG', 'png'],
-              ] as const
-            ).map(([label, val]) => (
-              <View
-                key={val}
-                className={`chip ${format === val ? 'chip-active' : ''}`}
-                onClick={() => setFormat(val)}>
-                {label}
+          <View
+            className={`seg-item ${!compressTab ? 'seg-item-active' : ''}`}
+            onClick={() => setCompressTab(false)}>
+            拼接
+          </View>
+        </View>
+
+        <View className='pick-card'>
+          <Text
+            className={`pick-status ${files.length ? 'pick-status-has' : ''}`}>
+            {files.length ? `已选择 ${files.length} 张图片` : '从相册或相机添加图片'}
+          </Text>
+          <View
+            className={`btn-orange ${busy ? 'btn-orange-disabled' : ''}`}
+            onClick={pickFiles}>
+            选择图片
+          </View>
+        </View>
+
+        {files.length > 0 && (
+          <ScrollView scrollY className='file-panel'>
+            {files.map(f => (
+              <View key={f.path} className='file-row'>
+                <Text>{f.name}</Text>
               </View>
             ))}
-          </View>
-        </View>
-      ) : (
-        <Text className='hint'>按列表顺序横向拼接，高度对齐最短边</Text>
-      )}
+          </ScrollView>
+        )}
 
-      <View className='actions'>
-        <View className='btn-orange' onClick={busy ? undefined : runJob}>
+        {compressTab ? (
+          <View className='settings'>
+            <Text className='settings-title'>压缩质量</Text>
+            <View className='quality-box'>
+              <View
+                className='step-btn'
+                onClick={() => setQuality(q => Math.max(1, q - 5))}>
+                −
+              </View>
+              <Text className='quality-value'>{quality}</Text>
+              <View
+                className='step-btn'
+                onClick={() => setQuality(q => Math.min(100, q + 5))}>
+                +
+              </View>
+            </View>
+            <Text className='settings-title'>输出格式</Text>
+            <View className='chips'>
+              {(
+                [
+                  ['保持原格式', 'keep'],
+                  ['JPEG', 'jpeg'],
+                  ['PNG', 'png'],
+                ] as const
+              ).map(([label, val]) => (
+                <View
+                  key={val}
+                  className={`chip ${format === val ? 'chip-active' : ''}`}
+                  onClick={() => setFormat(val)}>
+                  <Text>{label}</Text>
+                </View>
+              ))}
+            </View>
+          </View>
+        ) : (
+          <Text className='stitch-tip'>
+            按当前列表顺序横向拼接，高度对齐最短边，输出 PNG 并保存到相册。
+          </Text>
+        )}
+
+        {log ? (
+          <Text className='log'>{log}</Text>
+        ) : (
+          <Text className='log log-empty'>处理结果将显示在这里</Text>
+        )}
+      </ScrollView>
+
+      <View className='footer'>
+        <View
+          className={`btn-orange ${busy ? 'btn-orange-disabled' : ''}`}
+          onClick={runJob}>
           {runLabel}
         </View>
-        <View
-          className='tab'
-          onClick={() => {
-            setFiles([]);
-            setLog('');
-          }}>
-          清空
-        </View>
+        <View className='btn-ghost' onClick={clearAll}>清空</View>
       </View>
-
-      <Text className='log'>{log}</Text>
 
       <Canvas
         type='2d'

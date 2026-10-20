@@ -1,3 +1,6 @@
 export default definePageConfig({
   navigationBarTitleText: '轻图',
+  navigationBarBackgroundColor: '#E6FAF6',
+  backgroundColor: '#F0FDFA',
+  disableScroll: true,
 });
