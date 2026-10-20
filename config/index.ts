@@ -16,7 +16,8 @@ export default defineConfig<'webpack5'>(async (merge) => {
       828: 1.81 / 2,
     },
     sourceRoot: 'src',
-    outputRoot: 'dist',
+    // H5 与小程序勿共用 dist，否则 dev:h5 会清空微信模拟器正在用的产物
+    outputRoot: process.env.TARO_ENV === 'h5' ? 'dist-h5' : 'dist',
     plugins: ['@tarojs/plugin-generator'],
     defineConstants: {},
     copy: { patterns: [], options: {} },

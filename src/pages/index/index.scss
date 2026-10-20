@@ -1,16 +1,8 @@
 .page {
-  display: flex;
-  flex-direction: column;
-  height: 100vh;
+  min-height: 100vh;
   box-sizing: border-box;
-  background: linear-gradient(180deg, #e6faf6 0%, #f0fdfa 160px, #f0fdfa 100%);
-}
-
-.scroll-main {
-  flex: 1;
-  min-height: 0;
-  padding: 8px 32px 24px;
-  box-sizing: border-box;
+  padding: 16px 32px 200px;
+  background: linear-gradient(180deg, #e6faf6 0%, #f0fdfa 200px, #f0fdfa 100%);
 }
 
 .hero {
@@ -59,7 +51,6 @@
   font-size: 28px;
   color: #64748b;
   border-radius: 12px;
-  transition: all 0.15s ease;
 }
 
 .seg-item-active {
@@ -116,7 +107,6 @@
   border-radius: 16px;
   border: 1px solid #d1fae5;
   overflow: hidden;
-  max-height: 200px;
 }
 
 .file-row {
@@ -228,14 +218,18 @@
 }
 
 .footer {
-  flex-shrink: 0;
+  position: fixed;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  z-index: 10;
   display: flex;
   align-items: center;
   padding: 16px 32px;
   padding-bottom: calc(16px + env(safe-area-inset-bottom));
-  background: rgba(240, 253, 250, 0.96);
+  background: rgba(240, 253, 250, 0.98);
   border-top: 1px solid rgba(13, 148, 136, 0.1);
-  box-shadow: 0 -8px 24px rgba(19, 78, 74, 0.04);
+  box-shadow: 0 -8px 24px rgba(19, 78, 74, 0.06);
 }
 
 .footer .btn-orange {
@@ -262,4 +256,6 @@
   left: -9999px;
   width: 1px;
   height: 1px;
+  opacity: 0;
+  pointer-events: none;
 }
